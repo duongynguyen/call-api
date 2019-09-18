@@ -1,18 +1,59 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
+import { Route, Link } from "react-router-dom";
+
+const menus = [
+  {
+    name: "Home",
+    to: "/",
+    exact: true
+  },
+  {
+    name: "Products",
+    to: "/product-list",
+    exact: false
+  }
+];
+
+const MenuLink = ({ label, to, activeOnlyWhenExact }) => {
+  return (
+    <Route
+      path={to}
+      exact={activeOnlyWhenExact}
+      children={({ match }) => {
+        const active = match ? "active" : "";
+        return (
+          <li className={active}>
+            <Link to={to}>{label}</Link>
+          </li>
+        );
+      }}
+    />
+  );
+};
 
 class Menu extends Component {
+  showMenus = menus => {
+    let result = null;
+    if (menus.length > 0) {
+      result = menus.map((menu, index) => (
+        <MenuLink
+          key={index}
+          label={menu.name}
+          to={menu.to}
+          activeOnlyWhenExact={menu.exact}
+        />
+      ));
+    }
+    return result;
+  };
+
   render() {
     return (
       <div className="navbar navbar-default">
-        <a className="navbar-brand">CALL API</a>
-        <ul className="nav navbar-nav">
-          <li className="active">
-            <a>Home</a>
-          </li>
-          <li>
-            <a>Products Managerment</a>
-          </li>
-        </ul>
+        <a className="navbar-brand" href="/">
+          CALL API
+        </a>
+        <ul className="nav navbar-nav">{this.showMenus(menus)}</ul>
       </div>
     );
   }
