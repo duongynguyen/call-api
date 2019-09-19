@@ -1,6 +1,14 @@
 import React, { Component } from "react";
+import { Link } from "react-router-dom";
 
 class ProductItem extends Component {
+  onClick = id => {
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm("Do you want to delete this product?")) {
+      this.props.onDelete(id);
+    }
+  };
+
   render() {
     const { product, index } = this.props;
     const statusName = product.status ? "Sitll" : "Sold";
@@ -15,10 +23,14 @@ class ProductItem extends Component {
           <span className={`label label-${statusClass}`}>{statusName}</span>
         </td>
         <td>
-          <button type="button" className="btn btn-primary mr-10">
+          <Link to={`/product/edit/${product.id}`} className="btn btn-primary mr-10">
             Edit
-          </button>
-          <button type="button" className="btn btn-danger">
+          </Link>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={() => this.onClick(product.id)}
+          >
             Delete
           </button>
         </td>
