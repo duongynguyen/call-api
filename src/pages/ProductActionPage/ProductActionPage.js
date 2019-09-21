@@ -1,6 +1,11 @@
 import React, { Component } from "react";
-import callApi from "../../utils/apiCaller";
 import { Link } from "react-router-dom";
+import {
+  actAddProductRequest,
+  actGetProductRequest,
+  actUpdateProductRequest
+} from "../../actions";
+import { connect } from "react-redux";
 
 class ProductActionPage extends Component {
   constructor(props) {
@@ -17,14 +22,18 @@ class ProductActionPage extends Component {
     const { match } = this.props;
     if (match) {
       const id = match.params.id;
-      callApi(`products/${id}`, "GET", null).then(res => {
-        const data = res.data;
-        this.setState({
-          id: data.id,
-          txtName: data.name,
-          txtPrice: data.price,
-          chkbStatus: data.status
-        });
+      this.props.onGetProduct(id);
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps && nextProps.itemEditing) {
+      const { itemEditing } = nextProps;
+      this.setState({
+        id: itemEditing.id,
+        txtName: itemEditing.name,
+        txtPrice: itemEditing.price,
+        chkbStatus: itemEditing.status
       });
     }
   }
@@ -42,22 +51,18 @@ class ProductActionPage extends Component {
     event.preventDefault();
     const { id, txtName, txtPrice, chkbStatus } = this.state;
     const { history } = this.props;
+    const product = {
+      id: id,
+      name: txtName,
+      price: txtPrice,
+      status: chkbStatus
+    };
     if (id && txtName && txtPrice) {
-      callApi(`products/${id}`, "PUT", {
-        name: txtName,
-        price: txtPrice,
-        status: chkbStatus
-      }).then(res => {
-        history.goBack();
-      });
+      this.props.onUpdateProduct(product);
+      history.goBack();
     } else if (txtName && txtPrice) {
-      callApi("products", "POST", {
-        name: txtName,
-        price: txtPrice,
-        status: chkbStatus
-      }).then(res => {
-        history.goBack();
-      });
+      this.props.onAddProduct(product);
+      history.goBack();
     }
   };
 
@@ -119,4 +124,27 @@ class ProductActionPage extends Component {
   }
 }
 
-export default ProductActionPage;
+const mapStateToProps = state => {
+  return {
+    itemEditing: state.itemEditing
+  };
+};
+
+const mapDispatchToProps = (dispatch, props) => {
+  return {
+    onAddProduct: product => {
+      dispatch(actAddProductRequest(product));
+    },
+    onGetProduct: id => {
+      dispatch(actGetProductRequest(id));
+    },
+    onUpdateProduct: product => {
+      dispatch(actUpdateProductRequest(product));
+    }
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ProductActionPage);
